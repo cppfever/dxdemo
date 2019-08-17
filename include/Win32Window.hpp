@@ -71,7 +71,7 @@ public:
 protected:
 
     virtual void OnIdle(){}
-    virtual void OnDraw(){}
+    virtual void OnPaint(){}
     virtual void OnResize(int width, int height){}
     virtual void OnLostFocus(){}
     virtual void OnGainedFocus(){}
@@ -104,7 +104,7 @@ protected:
             {
                 PAINTSTRUCT ps;
                 HDC hdc = ::BeginPaint(handle, &ps);
-                OnDraw();
+                OnPaint();
                 ::EndPaint(handle, &ps);
                 result = 0;
                 return true;

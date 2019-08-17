@@ -6,9 +6,12 @@
 namespace dxdemo
 {
 
-class Window : public WindowBase
+class Window : public impl::Win32Window
 {
 public:
+
+    Window()
+    {}
 
     Window(const char* title, int x, int y, int width, int height)
     {
@@ -20,27 +23,59 @@ public:
         Destroy();
     }
 
+    void SetPaintTimer(uint32_t period)
+    {
+        std::thread([=]()
+        {
+            while(true)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(period));
+                OnPaint();
+                m_thick++;
+            }
+        }).detach();
+    }
+
+    int GetThick()
+    {
+        return m_thick;
+    }
+
 protected:
 
     void Create(const char* title, int x, int y, int width, int height) override
     {
-        WindowBase::Create(title, x, y, width, height);
+        AddToEventLoop(this);
+        impl::Win32Window::Create(title, x, y, width, height);
     }
 
-    void Destroy() override
+    void Destroy()
     {
-        WindowBase::Destroy();
+       impl::Win32Window::Destroy();
+        RemoveFromEventLoop(this);
     }
 
-    void OnDraw() override
-    {
+private:    
 
+    static void AddToEventLoop(Window* window)
+    {
+        auto i = std::find(s_windows.begin(), s_windows.end(), window);
+
+        if( i== s_windows.end())
+            s_windows.push_back(window);
     }
 
-    void OnResize(int width, int height) override
+    static void RemoveFromEventLoop(Window* window)
     {
+        auto i = std::find(s_windows.begin(), s_windows.end(), window);
 
-    } 
+        if( i!= s_windows.end())
+            s_windows.erase(i);
+    }
+
+    friend class dxdemo::EventLoop;
+    static inline std::vector<impl::Win32Window*> s_windows;
+    int m_thick = 0;
 
 };//class Window
 

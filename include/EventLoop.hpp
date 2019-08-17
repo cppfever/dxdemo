@@ -5,7 +5,7 @@
 namespace dxdemo
 {
 
-class WindowBase;
+class Window;
 
 class EventLoop
 {
@@ -13,12 +13,12 @@ public:
 
     int Run()
     {
-        while(WindowBase::s_windows.size())
+        while(Window::s_windows.size())
         {
-            for(auto window : WindowBase::s_windows)
+            for(auto window : Window::s_windows)
                 window->ProcessEvents();
 
-            for(auto window : WindowBase::s_windows)
+            for(auto window : Window::s_windows)
                 window->OnIdle();
         }
 

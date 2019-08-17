@@ -1,4 +1,0 @@
-#ifndef INITIALIZER_HPP
-#define INITIALIZER_HPP
-
-#endif // INITIALIZER_HPP
