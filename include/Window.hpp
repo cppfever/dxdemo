@@ -6,7 +6,7 @@
 namespace dxdemo
 {
 
-class Window : public WindowBase<Window>
+class Window : public WindowBase
 {
 public:
 

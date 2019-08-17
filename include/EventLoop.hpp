@@ -5,28 +5,26 @@
 namespace dxdemo
 {
 
-template<typename T>
 class WindowBase;
 
-template<typename T>
-class EventLoopT
+class EventLoop
 {
 public:
 
     int Run()
     {
-        while(WindowBase<T>::s_windows.size())
+        while(WindowBase::s_windows.size())
         {
-            for(auto window : WindowBase<T>::s_windows)
+            for(auto window : WindowBase::s_windows)
                 window->ProcessEvents();
 
-            for(auto window : WindowBase<T>::s_windows)
+            for(auto window : WindowBase::s_windows)
                 window->OnIdle();
         }
 
-        return 0;
+        return 777;
     }
 
-};//class EventLoopT
+};//class EventLoop
 
-} // namespace vgui
+} // namespace dxdemo

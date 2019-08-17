@@ -6,10 +6,11 @@
 namespace dxdemo::impl
 {
 
-template<typename T>
 class Win32Window
 {
 public:
+
+    friend class dxdemo::EventLoop;
 
     dxdemo::Handle Handle()
     {
@@ -23,43 +24,35 @@ public:
 
     int X()
     {
-        return Position().x;
+        RECT rect;
+        ::GetWindowRect(m_handle, &rect);
+        return rect.left;
     }
 
     int Y()
     {
-        return Position().y;
-    }
-
-    dxdemo::PointI Position()
-    {
         RECT rect;
         ::GetWindowRect(m_handle, &rect);
-        return dxdemo::PointI(rect.left, rect.top);
+        return rect.top;
     }
 
     int Width()
     {
-        return Size().width;
+        RECT rect;
+        ::GetWindowRect(m_handle, &rect);
+        return rect.right - rect.left;
     }
 
     int Height()
     {
-        return Size().height;
-    }
-
-    dxdemo::SizeI Size()
-    {
         RECT rect;
         ::GetWindowRect(m_handle, &rect);
-        return dxdemo::SizeI(rect.right - rect.left, rect.bottom - rect.top);
+        return rect.bottom - rect.top;
     }
 
-    dxdemo::RectI Rect()
+    void SetRect(int x, int y, int width, int height)
     {
-        RECT rect;
-        ::GetWindowRect(m_handle, &rect);
-        return dxdemo::RectI(rect.left, rect.top, rect.right, rect.bottom);
+        ::MoveWindow(m_handle, x, y, width, height, true);
     }
 
     bool Visible()
@@ -67,82 +60,15 @@ public:
         return static_cast<bool>(::IsWindowVisible(m_handle));
     }
 
-    T& SetX(int x)
-    {
-        dxdemo::RectI rect = Rect();
-        return SetRect(x, rect.y, rect.width, rect.height);
-    }
-
-    T& SetY(int y)
-    {
-        dxdemo::RectI rect = Rect();
-        return SetRect(rect.x, y, rect.width, rect.height);
-    }
-
-    T& SetPosition(int x, int y)
-    {
-        dxdemo::SizeI size = Size();
-        return SetRect(x, y, size.width, size.height);
-    }
-
-    T& SetPosition(Point position)
-    {
-        dxdemo::SizeI size = Size();
-        return SetRect(position.x, position.y, size.width, size.height);
-    }
-
-    T& SetWidth(int width)
-    {
-        dxdemo::RectI rect = Rect();
-        return SetRect(rect.x, rect.y, width, rect.height);
-    }
-
-    T& SetHeight(int height)
-    {
-        dxdemo::RectI rect = Rect();
-        return SetRect(rect.x, rect.y, rect.width, height);
-    }
-
-    T& SetSize(int width, int height)
-    {
-        dxdemo::PointI pos = Position();
-        return SetRect(pos.x, pos.y, width, height);
-    }
-
-    T& SetSize(dxdemo::SizeI size)
-    {
-        dxdemo::PointI pos = Position();
-        return SetRect(pos.x, pos.y, size.width, size.height);
-    }
-
-    T& SetRect(dxdemo::RectI rect)
-    {
-        return SetRect(rect.x, rect.y, rect.width, rect.height);
-    }
-
-    T& SetRect(int x, int y, int width, int height)
-    {
-        ::MoveWindow(m_handle, x, y, width, height, true);
-        return CastThis();
-    }
-
-    T& SetVisible(bool show)
+    void SetVisible(bool show)
     {
         if(show)
             ::ShowWindow(m_handle, SW_SHOW);
         else
             ::ShowWindow(m_handle, SW_HIDE);
-
-        return CastThis<T>();
     }
 
 protected:
-
-    template<typename U>
-    U& CastThis()
-    {
-        return dynamic_cast<U&>(*this);
-    }
 
     virtual void OnIdle(){}
     virtual void OnDraw(){}
@@ -196,7 +122,7 @@ protected:
             }
             else if(msg == WM_CLOSE)
             {
-                bool close = false;
+                bool close = true;
                 OnClose(close);
 
                 if(close)
@@ -220,7 +146,7 @@ protected:
             if(win_ptr)
                 SetWindowLongPtr(handle, GWLP_USERDATA, win_ptr);
             else
-                throw ExceptionInfo << "NULL Win32Window pointer in CreateWin32Window function.";
+                throw std::runtime_error("NULL Win32Window pointer in CreateWin32Window function.");
 
             return 0;
         }
@@ -251,7 +177,7 @@ protected:
         while((ret = GetMessage( &msg, NULL, 0, 0 )) != 0)
         {
             if(ret == -1)
-                throw ExceptionInfo << "Win32 event loop error.";
+                throw std::runtime_error("Win32 event loop error.");
             else
             {
                 TranslateMessage(&msg);
@@ -265,7 +191,7 @@ protected:
     virtual void Create(const char* title, int x, int y, int width, int height)
     {
         if(m_handle)
-            throw ExceptionInfo << "Wind32 window handle is not NULL. Maybe window created ?.";
+            throw std::runtime_error("Wind32 window handle is not NULL. Maybe window created ?.");
 
         std::wstring classname = L"dxdemo::iWin32Window";
         classname += std::to_wstring(reinterpret_cast<int64_t>(this));
@@ -282,7 +208,7 @@ protected:
         wndclassex.hCursor = LoadCursor(NULL, IDC_ARROW);
 
         if(!::RegisterClassEx(&wndclassex))
-            throw ExceptionInfo << "Can't register Win32 window class.";
+            throw std::runtime_error("Can't register Win32 window class.");
 
         //::DwmEnableComposition(DWM_EC_DISABLECOMPOSITION);
 
@@ -291,7 +217,7 @@ protected:
                                     x, y, width, height, NULL, NULL, hinstance, this);
 
         if(!m_handle)
-            throw ExceptionInfo << "Can't create Win32 window.";
+            throw std::runtime_error("Can't create Win32 window.");
     }
 
     virtual void Destroy()

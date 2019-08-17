@@ -2,18 +2,13 @@
 
 
 int main(int argc, char **argv)
-//int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {    
     try
     {
         dxdemo::EventLoop loop;
-        dxdemo::DX9Window window("Main ok Window", 300, 400, 800, 600);
+        dxdemo::DX9Window window("Main Window", 300, 400, 800, 600);
 
         return loop.Run();
-    }
-    catch(const dxdemo::Exception& e)
-    {
-        e.Print();
     }
     catch(const std::exception& e)
     {
@@ -25,5 +20,5 @@ int main(int argc, char **argv)
         std::cout << "Unknown Error in DxDemo application !" << std::endl;
     }
 
-    return 777;
+    return 111;
 }

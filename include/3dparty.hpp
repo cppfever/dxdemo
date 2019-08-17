@@ -14,8 +14,8 @@
 
 //Windows
 #include <windows.h>
-#include <Wincodec.h>
+#include <wincodec.h>
 #include <d3d9.h>
 #include <wrl.h>
-#include <D3dx9tex.h>
+#include <d3dx9tex.h>
 

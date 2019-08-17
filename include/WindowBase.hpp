@@ -6,23 +6,19 @@
 namespace dxdemo
 {
 
-template<typename T>
-class EventLoopT;
-
-template<typename T>
-class WindowBase : public impl::Win32Window<T>
+class WindowBase : public impl::Win32Window
 {
 protected:
 
     void Create(const char* title, int x, int y, int width, int height) override
     {
-        impl::Win32Window<T>::Create(title, x, y, width, height);
+        impl::Win32Window::Create(title, x, y, width, height);
         AddToEventLoop(this);
     }
 
     void Destroy()
     {
-       impl::Win32Window<T>::Destroy();
+       impl::Win32Window::Destroy();
         RemoveFromEventLoop(this);
     }
 
@@ -44,10 +40,10 @@ private:
             s_windows.erase(i);
     }
 
-    friend class dxdemo::EventLoopT<T>;
-    static inline std::vector<dxdemo::WindowBase<T>*> s_windows;
+    friend class dxdemo::EventLoop;
+    static inline std::vector<impl::Win32Window*> s_windows;
 
 };//class WindowBase
 
-}//namespace vgui
+}//namespace dxdemo
 
