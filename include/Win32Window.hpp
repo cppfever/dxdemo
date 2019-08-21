@@ -50,6 +50,20 @@ public:
         return rect.bottom - rect.top;
     }
 
+    int ViewportWidth()
+    {
+        RECT rect;
+        ::GetClientRect(m_handle, &rect);
+        return rect.right - rect.left;
+    }
+
+    int ViewportHeight()
+    {
+        RECT rect;
+        ::GetClientRect(m_handle, &rect);
+        return rect.bottom - rect.top;
+    }
+
     void SetRect(int x, int y, int width, int height)
     {
         ::MoveWindow(m_handle, x, y, width, height, true);
@@ -116,6 +130,7 @@ protected:
             }
             else if(msg == WM_SIZE)
             {
+
                 OnResize(LOWORD(lparam), HIWORD(lparam));
                 result = 0;
                 return true;

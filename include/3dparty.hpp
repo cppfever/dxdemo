@@ -18,9 +18,11 @@
 //Windows
 #include <windows.h>
 #include <wincodec.h>
-#define D3D_OVERLOADS
+
+//Direct3D9
 #include <d3d9.h>
-//#include <d3dtypes.h>
-#include <wrl.h>
+#include <d3dx9.h>
+#include <d3dx9math.h>
 #include <d3dx9tex.h>
+#include <wrl.h>
 

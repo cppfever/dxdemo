@@ -7,7 +7,7 @@ int main(int argc, char **argv)
     {
         dxdemo::EventLoop loop;
         dxdemo::DX9Window window("Main Window", 200, 200, 800, 600);
-        window.SetPaintTimer(30);
+        //window.SetPaintTimer(30);
 
         return loop.Run();
     }
