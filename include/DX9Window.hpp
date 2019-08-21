@@ -113,7 +113,7 @@ protected:
 
     void OnPaint() override
     {
-        m_paintmutex.lock();
+        m_d3dmutex.lock();
 
         int width = ViewportWidth();
         int height = ViewportHeight();
@@ -174,7 +174,7 @@ protected:
             vertex_buffer.Reset();
         }
 
-        m_paintmutex.unlock();
+        m_d3dmutex.unlock();
     }
 
     void OnResize(int width, int height) override
@@ -188,14 +188,16 @@ protected:
         //        // Устанавливаем проекционную матрицу
         //        if(m_device)
         //            m_device->SetTransform( D3DTS_PROJECTION, &matProjection );
+        m_d3dmutex.lock();
         ResetDevice(0, 0);
+        m_d3dmutex.unlock();
     }
 
 private:    
 
     ComPtr<IDirect3DDevice9> m_device;
     ComPtr<IDirect3DSurface9> m_surface;
-    std::mutex m_paintmutex;
+    std::mutex m_d3dmutex;
     Point m_a{0.5, 0.1};
     Point m_b{0.9, 0.9};
     Point m_c{0.1, 0.9};
