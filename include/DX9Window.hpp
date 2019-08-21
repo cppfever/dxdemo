@@ -68,6 +68,14 @@ protected:
 
     void ResetDevice(int width, int height)
     {
+        RECT rect;
+        ::GetClientRect(Handle(), &rect);
+
+        //IF CLIENT AREA WIDTH OR HEIGHT EQUAL ZERO THAN IDirect3dDevice9::Reset
+        //WILL CAUSE RUNTIME ERROR
+        if(rect.right == 0 || rect.bottom == 0)
+            return;
+
         HRESULT result = m_device->TestCooperativeLevel();
 
         if(result == D3DERR_DEVICELOST)
@@ -179,15 +187,6 @@ protected:
 
     void OnResize(int width, int height) override
     {
-
-
-
-        //        D3DXMATRIX matProjection;						// Создаем проекционную матрицу
-        //        D3DXMatrixPerspectiveFovLH(&matProjection, 45.0f, (float)width/(float)height, 0.1f, 100.0f );
-
-        //        // Устанавливаем проекционную матрицу
-        //        if(m_device)
-        //            m_device->SetTransform( D3DTS_PROJECTION, &matProjection );
         m_d3dmutex.lock();
         ResetDevice(0, 0);
         m_d3dmutex.unlock();
