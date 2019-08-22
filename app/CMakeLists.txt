@@ -16,4 +16,4 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${DXDEMO_BINARY_DIR})
 #find_package(glew REQUIRED)
 
 add_executable(dxdemo dxdemo.cpp)
-target_link_libraries(dxdemo d3d9 d3dx9)
+target_link_libraries(dxdemo d3d9 d3dx9 winmm)
