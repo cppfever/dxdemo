@@ -10,7 +10,7 @@ namespace dxdemo
 
 struct D3DVERTEX
 {
-    float x, y, z;
+    FLOAT x, y, z;
     DWORD color;
 };
 
@@ -55,14 +55,14 @@ protected:
         D3DPRESENT_PARAMETERS params = {0};
         params.Windowed = TRUE;
         params.SwapEffect = D3DSWAPEFFECT_DISCARD;
-        params.BackBufferFormat = D3DFMT_A8R8G8B8;
+        params.BackBufferFormat = D3DFMT_X8R8G8B8;
         params.BackBufferCount = 1;
         params.hDeviceWindow = Handle();
         params.BackBufferWidth = width;
         params.BackBufferHeight = height;
 
         if(FAILED(s_d3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
-                                      Handle(), D3DCREATE_SOFTWARE_VERTEXPROCESSING, &params, &m_device)))
+                                      Handle(), D3DCREATE_HARDWARE_VERTEXPROCESSING, &params, &m_device)))
             throw std::runtime_error("Direct3D9: can't create device.");
     }
 
@@ -78,8 +78,8 @@ protected:
 
         D3DPRESENT_PARAMETERS params = {0};
         params.Windowed = TRUE;
-        params.SwapEffect = D3DSWAPEFFECT_FLIP;
-        params.BackBufferFormat = D3DFMT_A8R8G8B8;
+        params.SwapEffect = D3DSWAPEFFECT_DISCARD;
+        params.BackBufferFormat = D3DFMT_X8R8G8B8;
         params.BackBufferCount = 1;
         params.hDeviceWindow = Handle();
         params.BackBufferWidth = width;
@@ -102,29 +102,6 @@ protected:
         if(m_device) m_device.Reset();
     }
 
-    void SetupMatrix()
-    {
-        D3DXMATRIX MatrixWorld;
-        D3DXMATRIX MatrixView;
-        D3DXMATRIX MatrixProjection;
-        UINT iTime=timeGetTime()%5000;
-        FLOAT fAngle=iTime*(2.0f*D3DX_PI)/5000.0f;
-        D3DXMatrixRotationX(&MatrixWorld, fAngle);
-        if(FAILED(m_device->SetTransform(D3DTS_WORLD, &MatrixWorld)))
-                throw std::runtime_error("Direct3D9: can't create vertex buffer.");
-
-        D3DXVECTOR3 from(4.0f, 4.0f, 4.0f);
-        D3DXVECTOR3 to(0.0f, 0.0f, 0.0f);
-        D3DXVECTOR3 up(0.0f, 1.0f, 0.0f);
-        D3DXMatrixLookAtLH(&MatrixView, &from, &to, &up);
-        if(FAILED(m_device->SetTransform(D3DTS_VIEW, &MatrixView)))
-           throw std::runtime_error("Direct3D9: can't create vertex buffer.");
-
-        D3DXMatrixPerspectiveFovLH(&MatrixProjection, D3DX_PI/4, 1.0f, 1.0f, 100.0f);
-        if(FAILED(m_device->SetTransform(D3DTS_PROJECTION, &MatrixProjection)))
-           throw std::runtime_error("Direct3D9: can't create vertex buffer.");
-    }
-
     void OnPaint() override
     {
         m_d3dmutex.lock();
@@ -136,54 +113,38 @@ protected:
 
         if(m_device->BeginScene() == D3D_OK)
         {
-            SetupMatrix();
             static float angle{0};
             angle += 0.1f;
-            std::wstringstream str;
-            str<< angle;
-            ::SetWindowText(Handle(), str.str().c_str());
 
             D3DXMATRIX rotation;
-            /*D3DXMatrixRotationX(&rotation, angle);
+            D3DXMatrixRotationZ(&rotation, angle);
             if(FAILED(m_device->SetTransform(D3DTS_WORLD, &rotation)))
                throw std::runtime_error("Direct3D9: can't create vertex buffer.");
 
-            D3DXMATRIX view;
-            D3DXVECTOR3 from(4.0f, 4.0f, 4.0f);
-            D3DXVECTOR3 to(0.0f, 0.0f, 0.0f);
-            D3DXVECTOR3 up(0.0f, 1.0f, 0.0f);
-            D3DXMatrixLookAtLH(&view, &from, &to, &up);
-            if(FAILED(m_device->SetTransform(D3DTS_VIEW, &view)))
-               throw std::runtime_error("Direct3D9: can't create vertex buffer.");
-
-            D3DXMATRIX ortho;
-            D3DXMatrixOrthoLH(&ortho, width, height,-1.0f, 1.0f);
-            if(FAILED(m_device->SetTransform(D3DTS_VIEW, &view)))
-               throw std::runtime_error("Direct3D9: can't create vertex buffer.");
-*/
+            m_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+            m_device->SetRenderState(D3DRS_LIGHTING, FALSE);
+            m_device->SetRenderState(D3DRS_AMBIENT,RGB(255,255,255));
+            m_device->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
 
             D3DVERTEX vertices[3];
 
-            vertices[0].x = 0.0;
-            vertices[0].y = 0.0;
-            vertices[0].z = 0.5;
-            vertices[0].color = 0x00ff00;
+            vertices[0].x = -1.0;
+            vertices[0].y = -1.0;
+            vertices[0].z = 0.0;
+            vertices[0].color = D3DCOLOR_XRGB(255, 0, 0);
 
-            vertices[1].x = m_b.x;
-            vertices[1].y = m_b.y;
-            vertices[1].z = 0.5;
-            vertices[1].color = 0x0000ff;
+            vertices[1].x = 0.0;
+            vertices[1].y = 1.0;
+            vertices[1].z = 0.0;
+            vertices[1].color = D3DCOLOR_XRGB(0, 255, 0);
 
-            vertices[2].x =  m_c.x;
-            vertices[2].y = m_c.y;
-            vertices[2].z = 0.5;
-            vertices[2].color = 0xff0000;
+            vertices[2].x =  1.0;
+            vertices[2].y = -1.0;
+            vertices[2].z = 0.0;
+            vertices[2].color = D3DCOLOR_XRGB(0, 0, 255);
 
             ComPtr<IDirect3DVertexBuffer9> vertex_buffer;
             void *video_memory = nullptr;
-
-            if(FAILED(m_device->SetFVF(D3DFVF_XYZ|D3DFVF_DIFFUSE)))
-                throw std::runtime_error("Direct3D9: can't set format.");
 
             if(FAILED(m_device->CreateVertexBuffer(3*sizeof(D3DVERTEX), 0,
                                                    D3DFVF_XYZ|D3DFVF_DIFFUSE, D3DPOOL_DEFAULT, &vertex_buffer, NULL)))
@@ -193,11 +154,15 @@ protected:
                 throw std::runtime_error("Direct3D9: can't lock vertex object.");
 
             memcpy(video_memory, vertices, 3*sizeof(D3DVERTEX));
+
             if(FAILED(vertex_buffer->Unlock()))
                 throw std::runtime_error("Direct3D9: can't unlock vertex object.");
 
             if(FAILED(m_device->SetStreamSource(0, vertex_buffer.Get(), 0, sizeof(D3DVERTEX))))
                 throw std::runtime_error("Direct3D9: can't set stream source.");
+
+            if(FAILED(m_device->SetFVF(D3DFVF_XYZ|D3DFVF_DIFFUSE)))
+                throw std::runtime_error("Direct3D9: can't set format.");
 
             if(FAILED(m_device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1)))
                 throw std::runtime_error("Direct3D9: can't draw primitives.");
